@@ -37,13 +37,23 @@ type PlannerInput = {
   additionalRequest?: unknown;
 };
 
+type ValidPlannerInput = {
+  area: string;
+  startTime: string;
+  endTime: string;
+  budget: string;
+  companion: string;
+  interests: string[];
+  additionalRequest?: unknown;
+};
+
 const systemPrompt = `당신은 한국어로 답하는 하루 코스 플래너입니다.
 사용자가 제공한 지역, 시간, 예산, 동행, 관심사를 바탕으로 현실적이고 이동이 효율적인 당일 코스를 제안하세요.
 반드시 사용자의 시작·종료 시간 안에서 일정을 구성하고, 이동 시간을 고려하세요. 예산은 최대한 지키세요.
 실시간 영업 여부나 예약 가능 여부는 확정하지 마세요. 확신하기 어려운 특정 상호명 대신 지역과 활동 단위의 제안을 사용하세요.
 반드시 지정된 JSON 스키마에 맞는 유효한 JSON 객체만 반환하세요. 마크다운, 코드 펜스, 설명 문장은 절대 포함하지 마세요.`;
 
-function isPlannerInput(value: PlannerInput): value is Required<Pick<PlannerInput, "area" | "startTime" | "endTime" | "budget" | "companion" | "interests">> & PlannerInput {
+function isPlannerInput(value: PlannerInput): value is ValidPlannerInput {
   return typeof value.area === "string" && value.area.trim().length > 0
     && typeof value.startTime === "string" && typeof value.endTime === "string"
     && typeof value.budget === "string" && typeof value.companion === "string"
