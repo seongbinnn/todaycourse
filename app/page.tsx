@@ -5,7 +5,14 @@ import { FormEvent, ReactNode, useState } from "react";
 
 type ScheduleItem = { time: string; activity: string; reason: string; duration: string; estimatedCost: string };
 type Plan = { title: string; summary: string; schedule: ScheduleItem[]; totalEstimatedCost: string; tips: string[] };
-const times = Array.from({ length: 25 }, (_, index) => { const hour = index + 6; return { label: `${hour < 12 ? "오전" : "오후"} ${hour === 12 ? 12 : hour > 12 ? hour - 12 : hour}시`, value: `${String(hour).padStart(2, "0")}:00` }; });
+const times = [
+  ...Array.from({ length: 19 }, (_, index) => {
+    const hour = index + 6;
+    const displayHour = hour === 12 || hour === 24 ? 12 : hour - 12;
+    return { label: `${hour < 12 ? "오전" : "오후"} ${displayHour}시`, value: hour === 24 ? "00:00" : `${String(hour).padStart(2, "0")}:00` };
+  }),
+  ...Array.from({ length: 5 }, (_, index) => ({ label: `오전 ${index + 1}시`, value: `0${index + 1}:00` })),
+];
 const budgets = ["3만 원 이하", "5만 원 이하", "10만 원 이하", "제한 없음"];
 const companions = ["혼자", "친구", "연인", "가족"];
 const interests = ["카페", "맛집", "전시", "산책", "쇼핑", "액티비티"];
