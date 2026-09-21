@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "모여, 스터디 | 함께 맞추는 가능 시간",
-  description: "그룹 스터디룸 시간을 쉽고 빠르게 맞춰보세요.",
+  title: "오늘의 코스 | AI 하루 코스 플래너",
+  description: "취향에 맞는 하루 코스를 AI가 추천해 드립니다.",
   other: {
     "codex-preview": "development",
   },
