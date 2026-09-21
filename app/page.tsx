@@ -8,7 +8,7 @@ type Plan = { title: string; summary: string; schedule: ScheduleItem[]; totalEst
 const times = [
   ...Array.from({ length: 19 }, (_, index) => {
     const hour = index + 6;
-    const displayHour = hour === 12 || hour === 24 ? 12 : hour - 12;
+    const displayHour = hour <= 12 ? hour : hour === 24 ? 12 : hour - 12;
     return { label: `${hour < 12 ? "오전" : "오후"} ${displayHour}시`, value: hour === 24 ? "00:00" : `${String(hour).padStart(2, "0")}:00` };
   }),
   ...Array.from({ length: 5 }, (_, index) => ({ label: `오전 ${index + 1}시`, value: `0${index + 1}:00` })),
