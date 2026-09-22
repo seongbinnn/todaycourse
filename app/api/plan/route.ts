@@ -88,21 +88,32 @@ export async function POST(request: Request) {
   ].join("\n");
 
   try {
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { responseMimeType: "application/json", responseSchema, temperature: 0.7 },
-      }),
-    });
-    const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>; error?: { message?: string } };
-    if (!response.ok) throw new Error(payload.error?.message || "Gemini 요청에 실패했어요.");
-    const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("Gemini가 코스 데이터를 반환하지 않았어요.");
-    const plan = JSON.parse(text) as unknown;
-    return NextResponse.json(plan);
+    const models = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
+    let lastError = "AI 코스 생성에 실패했어요.";
+
+    for (const model of models) {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+          generationConfig: { responseMimeType: "application/json", responseSchema, temperature: 0.7 },
+        }),
+      });
+      const payload = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>; error?: { message?: string } };
+      if (!response.ok) {
+        lastError = payload.error?.message || "Gemini 요청에 실패했어요.";
+        if (response.status === 429 || response.status >= 500) continue;
+        throw new Error(lastError);
+      }
+
+      const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Gemini가 코스 데이터를 반환하지 않았어요.");
+      return NextResponse.json(JSON.parse(text) as unknown);
+    }
+
+    throw new Error(lastError);
   } catch (error) {
     console.error("Gemini plan generation failed:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "코스 생성 중 오류가 발생했어요." }, { status: 502 });
